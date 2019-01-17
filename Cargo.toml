@@ -4,6 +4,10 @@ version = "0.1.0"
 authors = ["Sameer Puri <sameer@users.noreply.github.com>"]
 edition = "2018"
 
+
+[package.metadata.bootimage]
+default-target = "x86_64-toy-os.json"
+
 [profile.dev]
 panic = "abort"
 
@@ -11,3 +15,4 @@ panic = "abort"
 panic = "abort"
 
 [dependencies]
+bootloader = "0.3"
