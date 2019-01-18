@@ -20,21 +20,24 @@ fn panic(_info: &PanicInfo) -> ! {
     loop {}
 }
 
-static HELLO: &[u8] = b"Hello World!";
+const CHARACTERS: usize = 80 * 25;
+const VGA_BUFFER: *mut u8 = 0xb8000 as *mut u8;
+
 #[cfg(not(test))]
 #[no_mangle]
 pub extern "C" fn _start() -> ! {
-    let mut buf1 = [0u8; 1];
-    let mut buf = [0u8; 20];
-
     let mut rng = XorShiftRng::seed_from_u64(unsafe { x86::_rdtsc() } as u64);
-    let vga_buffer = 0xb8000 as *mut u8;
+
+    let mut chars = [0u8; CHARACTERS];
+    let mut colors = [0u8; CHARACTERS];
+
     loop {
-        for (i, &byte) in HELLO.iter().enumerate() {
+        rng.fill_bytes(&mut chars);
+        rng.fill_bytes(&mut colors);
+        for (i, (&c, color)) in chars.iter().zip(colors.iter()).enumerate() {
             unsafe {
-                *vga_buffer.offset(i as isize * 2) = byte;
-                rng.fill_bytes(&mut buf1);
-                *vga_buffer.offset(i as isize * 2 + 1) = buf1[0];
+                *VGA_BUFFER.offset(i as isize * 2) = c;
+                *VGA_BUFFER.offset(i as isize * 2 + 1) = *color;
             }
         }
     }
